@@ -39,7 +39,7 @@ class Menu
   end
 
   def make_train
-    print 'Введите тип поезда: '
+    print 'Введите тип(cargo или passenger) поезда: '
     type = gets.strip.to_sym
     print 'Введите номер поезда: '
     number = gets.strip
@@ -128,7 +128,7 @@ class Menu
     train_number = gets.strip
     case action
     when 1
-      print 'Введите тип вагона: '
+      print 'Введите тип(cargo или passenger) вагона: '
       type_wagon = gets.strip.to_sym
       hook_the_wagon_to_train(train_number, type_wagon)
     when 2

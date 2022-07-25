@@ -1,5 +1,5 @@
 class CargoTrain < Train
-  def def type_wagon
+  def type_wagon
     CargoWagon
   end
 end
