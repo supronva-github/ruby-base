@@ -1,12 +1,9 @@
-class Train 
-  TYPES = { cargo: :cargo, passenger: :passenger }.freeze
+class Train
+  attr_reader :current_station_id, :route, :speed, :type, :number, :wagons
 
-  attr_reader :current_station_id, :route, :speed, :quantity_wagon, :type, :number
-
-  def initialize(number, type, quantity_wagon)
+  def initialize(number)
     @number = number
-    @type = type
-    @quantity_wagon = quantity_wagon
+    @wagons = []
     @speed = 0
     @route = []
     @current_station_id = 0
@@ -20,19 +17,21 @@ class Train
     @speed += speed
   end
 
-  def hook_the_carriage
-    return unless stop?
-
-    @quantity_wagon += 1
+  def hook_the_wagon(wagon)
+    if valid_wagon?(wagon) && stop?
+      @wagons << wagon
+    else
+      puts 'Нельзя текущий вагон присоединить к поезду'
+    end
   end
 
-  def unhook_the_carriage
-    return unless stop? && @quantity_wagon.positive?
-
-    @quantity_wagon -= 1
+  def unhook_the_wagon
+    @wagons.pop if stop? && !@wagons.empty?
   end
 
   def get_route=(route)
+    return unless route
+
     @route = route
     arrival
   end
@@ -42,13 +41,13 @@ class Train
   end
 
   def previous_station
-    return if first_station?
+    return 'Вы на начальной станции' if first_station?
 
     @route.stations[current_station_id - 1]
   end
 
   def next_station
-    return if last_station?
+    return 'Вы на конечной станции' if last_station?
 
     @route.stations[current_station_id + 1]
   end
@@ -61,7 +60,7 @@ class Train
     arrival
   end
 
-  def back_forward
+  def backward
     return 'Вы на начальной станции' if first_station?
 
     departure
@@ -89,5 +88,9 @@ class Train
 
   def first_station?
     current_station == @route.stations.first
+  end
+
+  def valid_wagon?(wagon)
+    wagon.instance_of?(type_wagon)
   end
 end
