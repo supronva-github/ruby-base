@@ -11,6 +11,10 @@ class Station
     def all
       @@stations
     end
+    
+    def find(name)
+      station = @@stations.find { |s| s.name == name }
+     end
   end
 
   def initialize(name)

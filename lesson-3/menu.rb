@@ -8,14 +8,6 @@ require './cargo_train.rb'
 require './passenger_train.rb'
 
 class Menu
-  attr_reader :routes, :trains, :stations
-
-  def initialize
-    @trains = []
-    @routes = []
-    @stations = []
-  end
-
   def make_station
     print 'Введите назване станции: '
     name = gets.strip
@@ -24,8 +16,14 @@ class Menu
   end
 
   def show_all_stations
-    @stations.each do |station|
+    all_stations.each do |station|
       puts station.name
+    end
+  end
+
+  def show_all_routes
+    all_routes.each do |route|
+      puts route.name
     end
   end
 
@@ -79,7 +77,7 @@ class Menu
       station_name = gets.strip
       delete_station_in_route(route_name, station_name)
     when 4
-      puts @routes
+      show_all_routes
     end
   end
 
@@ -139,9 +137,7 @@ class Menu
   private
 
   def create_station(name)
-    station = Station.new(name)
-    @stations << station
-    station
+    Station.new(name)
   end
 
   def current_station_train(number)
@@ -160,13 +156,12 @@ class Menu
   end
 
   def create_train(type, number)
-    @trains <<
-      case type
-      when :cargo
-        CargoTrain.new(number)
-      when :passenger
-        PassengerTrain.new(number)
-      end
+    case type
+    when :cargo
+      CargoTrain.new(number)
+    when :passenger
+      PassengerTrain.new(number)
+    end
   end
 
   def unhook_wagon_the_train(number)
@@ -198,7 +193,6 @@ class Menu
     start_station = find_station(start_station)
     end_station = find_station(end_station)
     route = Route.new(name, start_station, end_station)
-    @routes << route
     route
   end
 
@@ -219,25 +213,33 @@ class Menu
     route = find_route(route_name)
     train.get_route = route
   end
+  
+  def all_stations
+    Station.all
+  end
+
+  def all_routes
+    Route.all
+  end
 
   def find_station(name)
-    station = @stations.find { |s| s.name == name }
+    station = Station.find(name)
     return puts "Такой станции #{name} - нету" unless station
 
     station
   end
 
-  def find_train(number)
-    train = @trains.find { |t| t.number == number }
-    return puts "Такого поезда #{number} - нету" unless train
-
-    train
-  end
-
   def find_route(name)
-    route = @routes.find { |r| r.name == name }
+    route = Route.find(name)
     return puts "Такого маршрута #{name} - нету" unless route
 
     route
+  end
+
+  def find_train(number)
+    train = Train.find(number)
+    return puts "Такого поезда #{number} - нету" unless train
+
+    train
   end
 end

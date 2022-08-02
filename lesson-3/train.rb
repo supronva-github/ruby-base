@@ -7,11 +7,11 @@ class Train
   include Manufacturer
   include InstanceCounter
 
-  @@trains = {}
+  @@trains = []
 
   class << self
     def find(number)
-      @@trains[number]
+     train = @@trains.find { |t| t.number == number }
     end
   end
 
@@ -21,7 +21,7 @@ class Train
     @speed = 0
     @route = []
     @current_station_id = 0
-    @@trains[number] = self
+    @@trains << self
     register_instance
   end
 
