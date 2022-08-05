@@ -1,5 +1,19 @@
+require './manufacturer.rb'
+require './instancecounter.rb'
+
 class Train
   attr_reader :current_station_id, :route, :speed, :type, :number, :wagons
+
+  include Manufacturer
+  include InstanceCounter
+
+  @@trains = []
+
+  class << self
+    def find(number)
+     train = @@trains.find { |t| t.number == number }
+    end
+  end
 
   def initialize(number)
     @number = number
@@ -7,6 +21,8 @@ class Train
     @speed = 0
     @route = []
     @current_station_id = 0
+    @@trains << self
+    register_instance
   end
 
   def stop!
