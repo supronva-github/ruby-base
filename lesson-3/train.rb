@@ -1,15 +1,23 @@
 require './manufacturer.rb'
 require './instancecounter.rb'
+require './validate.rb'
 
 class Train
+  FORMAT_TRAIN_NUMBER = /^\w{3}-?\w{2}$/i
+
   attr_reader :current_station_id, :route, :speed, :type, :number, :wagons
 
   include Manufacturer
   include InstanceCounter
+  include Validate
 
   @@trains = []
 
   class << self
+    def all
+      @@trains
+    end
+    
     def find(number)
      train = @@trains.find { |t| t.number == number }
     end
@@ -21,6 +29,7 @@ class Train
     @speed = 0
     @route = []
     @current_station_id = 0
+    validate!
     @@trains << self
     register_instance
   end
@@ -57,19 +66,19 @@ class Train
   end
 
   def previous_station
-    return 'Вы на начальной станции' if first_station?
+    raise ArgumentError, 'Вы на начальной станции' if first_station?
 
     @route.stations[current_station_id - 1]
   end
 
   def next_station
-    return 'Вы на конечной станции' if last_station?
+    raise ArgumentError, 'Вы на конечной станции' if last_station?
 
     @route.stations[current_station_id + 1]
   end
 
   def forward
-    return 'Вы на конечной станции' if last_station?
+    raise ArgumentError, 'Вы на конечной станции' if last_station?
 
     departure
     @current_station_id += 1
@@ -77,7 +86,7 @@ class Train
   end
 
   def backward
-    return 'Вы на начальной станции' if first_station?
+    raise ArgumentError, 'Вы на начальной станции' if first_station?
 
     departure
     @current_station_id -= 1
@@ -108,5 +117,9 @@ class Train
 
   def valid_wagon?(wagon)
     wagon.instance_of?(type_wagon)
+  end
+
+  def validate!
+    raise ArgumentError, "Number #{number} train is not valid" if number !~ FORMAT_TRAIN_NUMBER
   end
 end

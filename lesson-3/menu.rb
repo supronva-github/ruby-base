@@ -12,6 +12,10 @@ class Menu
     print 'Введите назване станции: '
     name = gets.strip
     station = create_station(name)
+  rescue ArgumentError => e
+    show_exception(e)
+    retry
+  else
     puts "Станция #{station.name} - создана"
   end
 
@@ -31,6 +35,9 @@ class Menu
     print 'Введите станцию: '
     station_name = gets.strip
     station = find_station(station_name)
+  rescue ArgumentError => e
+    show_exception(e)
+  else
     station.trains.each do |train|
       puts train.number
     end
@@ -42,6 +49,10 @@ class Menu
     print 'Введите номер поезда: '
     number = gets.strip
     train = create_train(type, number)
+  rescue ArgumentError => e
+    show_exception(e)
+    retry
+  else
     puts "Поезд #{train} - создан"
   end
 
@@ -79,6 +90,8 @@ class Menu
     when 4
       show_all_routes
     end
+  rescue ArgumentError => e
+    show_exception(e)
   end
 
   def manage_moving_the_train
@@ -105,6 +118,8 @@ class Menu
     when 5
       next_station_train(train_number)
     end
+  rescue ArgumentError => e
+    show_exception(e)
   end
 
   def assign_route_to_train
@@ -113,6 +128,10 @@ class Menu
     print 'Введите маршрут: '
     route_name = gets.strip
     add_route_to_train(train_number, route_name)
+  rescue ArgumentError => e
+    show_exception(e)
+  else
+    puts "Маршрут #{route_name} присвоен поезду #{train_number}"
   end
 
   def manage_wagon_the_train
@@ -132,6 +151,8 @@ class Menu
     when 2
       unhook_wagon_the_train(train_number)
     end
+  rescue ArgumentError => e
+    show_exception(e)
   end
 
   private
@@ -161,6 +182,8 @@ class Menu
       CargoTrain.new(number)
     when :passenger
       PassengerTrain.new(number)
+    else
+      raise ArgumentError, 'This type of train does not exist'
     end
   end
 
@@ -176,6 +199,8 @@ class Menu
       train.hook_the_wagon(CargoWagon.new)
     when :passenger
       train.hook_the_wagon(PassengerWagon.new)
+    else
+      raise ArgumentError, 'This type of wagon does not exist'
     end
   end
 
@@ -224,22 +249,26 @@ class Menu
 
   def find_station(name)
     station = Station.find(name)
-    return puts "Такой станции #{name} - нету" unless station
+    raise ArgumentError, "There is no such station #{name}" unless station
 
     station
   end
 
   def find_route(name)
     route = Route.find(name)
-    return puts "Такого маршрута #{name} - нету" unless route
+    raise ArgumentError, "There is no such route #{name}" unless route
 
     route
   end
 
   def find_train(number)
     train = Train.find(number)
-    return puts "Такого поезда #{number} - нету" unless train
+    raise ArgumentError, "There is no such train #{number}" unless train
 
     train
+  end
+
+  def show_exception(exception)
+    puts " #{exception.message} "
   end
 end
