@@ -13,7 +13,8 @@ loop do
     6 - Просмотреть список станций
     7 - Просмотреть список поездов на станции
     8 - Оцепить/Прицепить вагон к поезду
-    9 - Выйти из программы
+    9 - Контроль загрузки вагонов
+    10 - Выйти из программы
   MENU
   action = gets.to_i
   case action
@@ -34,6 +35,8 @@ loop do
   when 8
     menu.manage_wagon_the_train
   when 9
+    menu.wagon_loading_control
+  when 10
     exit
   end
 end

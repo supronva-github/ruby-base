@@ -29,6 +29,10 @@ class Station
     register_instance
   end
 
+  def trains_list
+    @trains.each { |train| yield(train) }
+  end
+
   def arrival_train(train)
     @trains << train
   end
