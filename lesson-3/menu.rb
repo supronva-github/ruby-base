@@ -6,6 +6,7 @@ require './cargo_wagon.rb'
 require './passenger_wagon.rb'
 require './cargo_train.rb'
 require './passenger_train.rb'
+require 'pry'
 
 class Menu
   def make_station
@@ -17,6 +18,7 @@ class Menu
     retry
   else
     puts "Станция #{station.name} - создана"
+    pry.binding
   end
 
   def show_all_stations
@@ -38,9 +40,7 @@ class Menu
   rescue ArgumentError => e
     show_exception(e)
   else
-    station.trains.each do |train|
-      puts train.number
-    end
+    station.trains_list { |train| puts "Номер поезда: #{train.number}, Тип поезда: #{train.class}, Количество вагонов: #{train.wagons.count}" }
   end
 
   def make_train
@@ -139,6 +139,7 @@ class Menu
       Укажите номер действия:
       1 - Прицепить грузовой/пассажирский вагон
       2 - Отцепить вагон
+      3 - Показать вагоны поезда
     MENU
     action = gets.to_i
     print 'Введите номер поезда: '
@@ -150,6 +151,31 @@ class Menu
       hook_the_wagon_to_train(train_number, type_wagon)
     when 2
       unhook_wagon_the_train(train_number)
+    when 3
+      train = find_train(train_number)
+      train.wagons_list { |wagon| puts wagon }
+    end
+  rescue ArgumentError => e
+    show_exception(e)
+  end
+
+  def wagon_loading_control
+    print 'Введите номер поезда: '
+    train_number = gets.strip
+    train = find_train(train_number)
+    case train
+    when CargoTrain
+      print 'Загрузить обьем: '
+      volume = gets.to_i
+      print 'Введите номер вагона: '
+      wagon_number = gets.to_i
+      load_wagon(train_number, volume, wagon_number)
+    when PassengerTrain
+      print 'Забронировать место: '
+      seat = gets.to_i
+      print 'Введите номер вагона: '
+      wagon_number = gets.to_i
+      seat_reservation(train_number, seat, wagon_number)
     end
   rescue ArgumentError => e
     show_exception(e)
@@ -266,6 +292,25 @@ class Menu
     raise ArgumentError, "There is no such train #{number}" unless train
 
     train
+  end
+
+  def find_wagon(train_number, wagon_number)
+    raise ArgumentError, 'The wagon cannot be empty' if wagon_number.zero?
+
+    train = find_train(train_number)
+    raise ArgumentError, 'There is no such wagon' if train.wagons.count < wagon_number
+
+    train.wagons[wagon_number - 1]
+  end
+
+  def load_wagon(train_number, volume, wagon_number)
+    wagon = find_wagon(train_number, wagon_number)
+    wagon.fill!(volume)
+  end
+
+  def seat_reservation(train_number, seat, wagon_number)
+    wagon = find_wagon(train_number, wagon_number)
+    wagon.take_seat!(seat)
   end
 
   def show_exception(exception)

@@ -42,6 +42,10 @@ class Train
     @speed += speed
   end
 
+  def wagons_list
+    @wagons.each { |wagon| yield(wagon) }
+  end
+
   def hook_the_wagon(wagon)
     if valid_wagon?(wagon) && stop?
       @wagons << wagon
