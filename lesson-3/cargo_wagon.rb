@@ -1,2 +1,1 @@
-class CargoWagon < Wagon
-end
+CargoWagon = Class.new(Wagon)

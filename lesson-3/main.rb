@@ -1,4 +1,4 @@
-require './menu.rb'
+require './menu'
 
 menu = Menu.new
 
