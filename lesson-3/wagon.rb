@@ -1,4 +1,4 @@
-require './manufacturer.rb'
+require './manufacturer'
 
 class Wagon
   include Manufacturer

@@ -1,15 +1,17 @@
-require './instancecounter.rb'
-require './validate.rb'
+require './instancecounter'
+require './validate'
 
 class Route
-  FORMAT_ROUTE_NAME = /[a-z]+-[a-z]/i
-
-  attr_reader :name, :start_station, :end_station, :stations
-
   include InstanceCounter
   include Validate
 
+  FORMAT_ROUTE_NAME = /[a-z]+-[a-z]/i.freeze
+
+  attr_reader :name, :start_station, :end_station, :stations
+
+  # rubocop:disable Style/ClassVars
   @@routes = []
+  # rubocop:enable Style/ClassVars
 
   class << self
     def all
@@ -17,8 +19,8 @@ class Route
     end
 
     def find(name)
-      route = @@routes.find { |r| r.name == name }
-     end
+      @@routes.find { |r| r.name == name }
+    end
   end
 
   def initialize(name, start_station, end_station)

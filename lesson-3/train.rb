@@ -1,25 +1,27 @@
-require './manufacturer.rb'
-require './instancecounter.rb'
-require './validate.rb'
+require './manufacturer'
+require './instancecounter'
+require './validate'
 
 class Train
-  FORMAT_TRAIN_NUMBER = /^\w{3}-?\w{2}$/i
-
-  attr_reader :current_station_id, :route, :speed, :type, :number, :wagons
-
   include Manufacturer
   include InstanceCounter
   include Validate
 
+  FORMAT_TRAIN_NUMBER = /^\w{3}-?\w{2}$/i.freeze
+
+  attr_reader :current_station_id, :route, :speed, :type, :number, :wagons
+
+  # rubocop:disable Style/ClassVars
   @@trains = []
+  # rubocop:enable Style/ClassVars
 
   class << self
     def all
       @@trains
     end
-    
+
     def find(number)
-     train = @@trains.find { |t| t.number == number }
+      @@trains.find { |t| t.number == number }
     end
   end
 
@@ -42,8 +44,8 @@ class Train
     @speed += speed
   end
 
-  def wagons_list
-    @wagons.each { |wagon| yield(wagon) }
+  def wagons_list(&block)
+    @wagons.each(&block)
   end
 
   def hook_the_wagon(wagon)

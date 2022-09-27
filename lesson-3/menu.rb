@@ -1,53 +1,45 @@
-require './train.rb'
-require './station.rb'
-require './route.rb'
-require './wagon.rb'
-require './cargo_wagon.rb'
-require './passenger_wagon.rb'
-require './cargo_train.rb'
-require './passenger_train.rb'
-require 'pry'
+require './train'
+require './station'
+require './route'
+require './wagon'
+require './cargo_wagon'
+require './passenger_wagon'
+require './cargo_train'
+require './passenger_train'
 
 class Menu
   def make_station
-    print 'Введите назване станции: '
-    name = gets.strip
+    name = input_station_name
     station = create_station(name)
   rescue ArgumentError => e
     show_exception(e)
     retry
   else
     puts "Станция #{station.name} - создана"
-    pry.binding
   end
 
   def show_all_stations
-    all_stations.each do |station|
-      puts station.name
-    end
+    all_stations.each { |station| puts station.name }
   end
 
   def show_all_routes
-    all_routes.each do |route|
-      puts route.name
-    end
+    all_routes.each { |route| puts route.name }
   end
 
   def show_trains_at_station
-    print 'Введите станцию: '
-    station_name = gets.strip
+    station_name = input_station_name
     station = find_station(station_name)
   rescue ArgumentError => e
     show_exception(e)
   else
-    station.trains_list { |train| puts "Номер поезда: #{train.number}, Тип поезда: #{train.class}, Количество вагонов: #{train.wagons.count}" }
+    station.trains_list do |train|
+      puts "Номер поезда: #{train.number}, Тип поезда: #{train.class}, Количество вагонов: #{train.wagons.count}"
+    end
   end
 
   def make_train
-    print 'Введите тип(cargo или passenger) поезда: '
-    type = gets.strip.to_sym
-    print 'Введите номер поезда: '
-    number = gets.strip
+    type = input_type_wagon
+    number = input_train_number
     train = create_train(type, number)
   rescue ArgumentError => e
     show_exception(e)
@@ -57,35 +49,22 @@ class Menu
   end
 
   def manage_routes
-    print <<~MENU
-      Укажите номер действия:
-      1 - Создать маршрут
-      2 - Добавить станцию в маршрут
-      3 - Удалить станцию в маршруте
-      4 - Посмотреть все маршруты
-    MENU
+    menu_manage_routes
     action = gets.to_i
     case action
     when 1
-      print 'Введите имя маршрута: '
-      route_name = gets.strip
-      print 'Введите начальную станцию: '
-      start_station = gets.strip
-      print 'Введите конечную станцию: '
-      end_station = gets.strip
+      route_name = input_route_name
+      start_station = input_start_station
+      end_station = input_end_station
       route = create_route(route_name, start_station, end_station)
       puts "Маршрут #{route.name} - создан"
     when 2
-      print 'Введиите имя маршрута: '
-      route_name = gets.strip
-      print 'Введите имя станции: '
-      station_name = gets.strip
+      route_name = input_route_name
+      station_name = input_station_name
       add_station_in_route(route_name, station_name)
     when 3
-      print 'Введите имя маршрута: '
-      route_name = gets.strip
-      print 'Введите имя станции: '
-      station_name = gets.strip
+      route_name = input_route_name
+      station_name = input_station_name
       delete_station_in_route(route_name, station_name)
     when 4
       show_all_routes
@@ -95,17 +74,9 @@ class Menu
   end
 
   def manage_moving_the_train
-    print <<~MENU
-      Укажите номер действия:
-      1 - Отправить поезд вперед по маршруту
-      2 - Отправить поезд назад по маршруту
-      3 - Посмотреть текущую станцию поезда
-      4 - Посмотреть предыдущую станцию поезда
-      5 - Посмотреть следующую станцию поезда
-    MENU
+    menu_manage_moving_the_train
     action = gets.to_i
-    print 'Введите номер поезда: '
-    train_number = gets.strip
+    train_number = input_train_number
     case action
     when 1
       forward_train(train_number)
@@ -123,10 +94,8 @@ class Menu
   end
 
   def assign_route_to_train
-    print 'Введите номер поезда: '
-    train_number = gets.strip
-    print 'Введите маршрут: '
-    route_name = gets.strip
+    train_number = input_train_number
+    route_name = input_route_name
     add_route_to_train(train_number, route_name)
   rescue ArgumentError => e
     show_exception(e)
@@ -135,19 +104,12 @@ class Menu
   end
 
   def manage_wagon_the_train
-    print <<~MENU
-      Укажите номер действия:
-      1 - Прицепить грузовой/пассажирский вагон
-      2 - Отцепить вагон
-      3 - Показать вагоны поезда
-    MENU
+    menu_manage_wagon_the_train
     action = gets.to_i
-    print 'Введите номер поезда: '
-    train_number = gets.strip
+    train_number = input_train_number
     case action
     when 1
-      print 'Введите тип(cargo или passenger) вагона: '
-      type_wagon = gets.strip.to_sym
+      type_wagon = input_type_wagon
       hook_the_wagon_to_train(train_number, type_wagon)
     when 2
       unhook_wagon_the_train(train_number)
@@ -243,8 +205,7 @@ class Menu
   def create_route(name, start_station, end_station)
     start_station = find_station(start_station)
     end_station = find_station(end_station)
-    route = Route.new(name, start_station, end_station)
-    route
+    Route.new(name, start_station, end_station)
   end
 
   def add_station_in_route(route_name, station_name)
@@ -264,7 +225,7 @@ class Menu
     route = find_route(route_name)
     train.get_route = route
   end
-  
+
   def all_stations
     Station.all
   end
@@ -315,5 +276,64 @@ class Menu
 
   def show_exception(exception)
     puts " #{exception.message} "
+  end
+
+  def input_station_name
+    print 'Введите назване станции: '
+    gets.strip
+  end
+
+  def input_start_station
+    print 'Введите начальную станцию: '
+    gets.strip
+  end
+
+  def input_end_station
+    print 'Введите конечную станцию: '
+    gets.strip
+  end
+
+  def input_train_number
+    print 'Введите номер поезда: '
+    gets.strip
+  end
+
+  def input_route_name
+    print 'Введите название маршрута: '
+    gets.strip
+  end
+
+  def input_type_wagon
+    print 'Введите тип(cargo или passenger) поезда: '
+    gets.strip.to_sym
+  end
+
+  def menu_manage_routes
+    print <<~MENU
+      Укажите номер действия:
+      1 - Создать маршрут
+      2 - Добавить станцию в маршрут
+      3 - Удалить станцию в маршруте
+      4 - Посмотреть все маршруты
+    MENU
+  end
+
+  def menu_manage_moving_the_train
+    print <<~MENU
+      Укажите номер действия:
+      1 - Отправить поезд вперед по маршруту
+      2 - Отправить поезд назад по маршруту
+      3 - Посмотреть текущую станцию поезда
+      4 - Посмотреть предыдущую станцию поезда
+      5 - Посмотреть следующую станцию поезда
+    MENU
+  end
+
+  def menu_manage_wagon_the_train
+    print <<~MENU
+      Укажите номер действия:
+      1 - Прицепить грузовой/пассажирский вагон
+      2 - Отцепить вагон
+    MENU
   end
 end

@@ -3,9 +3,9 @@ module InstanceCounter
     base.extend ClassMethods
     base.include InstanceMethods
   end
-    
+
   module ClassMethods
-      attr_accessor :instances
+    attr_accessor :instances
   end
 
   module InstanceMethods
@@ -17,4 +17,3 @@ module InstanceCounter
     end
   end
 end
- 
