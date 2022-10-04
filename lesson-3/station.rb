@@ -1,24 +1,26 @@
-require './instancecounter.rb'
-require './validate.rb'
+require './instancecounter'
+require './validate'
 
 class Station
-  FORMAT_STATION_NAME = /[a-z]+/i
-
-  attr_reader :name, :trains
-
   include InstanceCounter
   include Validate
 
+  FORMAT_STATION_NAME = /[a-z]+/i.freeze
+
+  attr_reader :name, :trains
+
+  # rubocop:disable Style/ClassVars
   @@stations = []
+  # rubocop:enable Style/ClassVars
 
   class << self
     def all
       @@stations
     end
-    
+
     def find(name)
-      station = @@stations.find { |s| s.name == name }
-     end
+      @@stations.find { |s| s.name == name }
+    end
   end
 
   def initialize(name)
@@ -29,8 +31,8 @@ class Station
     register_instance
   end
 
-  def trains_list
-    @trains.each { |train| yield(train) }
+  def trains_list(&block)
+    @trains.each(&block)
   end
 
   def arrival_train(train)
@@ -44,7 +46,7 @@ class Station
   def show_type_trains(type)
     @trains.select { |train| train.type == type }
   end
-  
+
   def validate!
     raise ArgumentError, "Name #{name} station is not valid" if name !~ FORMAT_STATION_NAME
     raise ArgumentError, "Station name #{name} is too long" if name.length > 20
