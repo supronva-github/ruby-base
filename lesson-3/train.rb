@@ -1,15 +1,23 @@
 require './manufacturer'
 require './instancecounter'
-require './validate'
+require './accessor'
+require './validation'
 
 class Train
   include Manufacturer
   include InstanceCounter
-  include Validate
+  include Accsessor
+  include Validation
 
   FORMAT_TRAIN_NUMBER = /^\w{3}-?\w{2}$/i.freeze
 
-  attr_reader :current_station_id, :route, :speed, :type, :number, :wagons
+  attr_reader :current_station_id, :route, :speed, :number, :wagons
+  attr_accessor_with_history :year, :weight
+  strong_attr_accessor :year => Integer
+
+  validate :number, :format, FORMAT_TRAIN_NUMBER
+  validate :number, :presence
+  validate :number, :type, String
 
   # rubocop:disable Style/ClassVars
   @@trains = []
@@ -123,9 +131,5 @@ class Train
 
   def valid_wagon?(wagon)
     wagon.instance_of?(type_wagon)
-  end
-
-  def validate!
-    raise ArgumentError, "Number #{number} train is not valid" if number !~ FORMAT_TRAIN_NUMBER
   end
 end
